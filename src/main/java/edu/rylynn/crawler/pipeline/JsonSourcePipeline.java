@@ -9,6 +9,8 @@ import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.pipeline.Pipeline;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -20,7 +22,7 @@ import java.io.IOException;
  */
 
 public class JsonSourcePipeline implements Pipeline {
-    private static final Logger logger = Logger.getLogger(JsonSourcePipeline.class);
+    private static final Logger LOGGER = Logger.getLogger(JsonSourcePipeline.class);
 
     private String filePrefix;
     private String fileSuffix;
@@ -43,15 +45,21 @@ public class JsonSourcePipeline implements Pipeline {
         persistentPage.setUrl(resultItems.get("url"));
 
         try {
-            String filename = filePrefix.concat(Long.toString(resultItems.get("pageId"))).concat(fileSuffix);
+            String filename = filePrefix.concat(Long.toString(resultItems
+                    .get("pageId")))
+                    .concat(fileSuffix);
+
             JsonWriter writer = new JsonWriter(new FileWriter(filename));
             writer.setIndent("  ");
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             gson.toJson(persistentPage, PersistentPage.class, writer);
             writer.close();
-            logger.info(persistentPage.getUrl() + " is saved into the path " + filename);
-        } catch (IOException e) {
+            LOGGER.info(persistentPage.getUrl() + " is saved into the path " + filename);
+        }
+        catch (IOException e) {
+            LOGGER.error("The directory " + filePrefix + " might not exists, please check and try again!!!");
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }
